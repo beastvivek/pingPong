@@ -27,22 +27,31 @@
     };
   }
 
+  const px = (value) => {
+    return value + 'px';
+  };
+
   const drawBall = (gameWindow, ball) => {
     const { size, position: { x, y } } = ball.getInfo();
     const ballDiv = gameWindow.appendChild(document.createElement('div'));
     ballDiv.id = 'ball';
     ballDiv.className = 'ball';
-    ballDiv.style.top = y + 'px';
-    ballDiv.style.left = x + 'px';
-    ballDiv.style.width = size + 'px';
+    ballDiv.style.top = px(y);
+    ballDiv.style.left = px(x);
+    ballDiv.style.width = px(size);
+  };
+
+  const drawGameWindow = (gameWindow) => {
+    gameWindow.style.width = px(500);
+    gameWindow.style.height = px(300);
+    gameWindow.style.border = `${px(1)} solid black`;
   };
 
   const updateBall = (ball) => {
     const { position: { x, y } } = ball.getInfo();
     const ballDiv = document.getElementById('ball');
-    ballDiv.style.top = y + 'px';
-    ballDiv.style.left = x + 'px';
-    console.log(x, y);
+    ballDiv.style.top = px(y);
+    ballDiv.style.left = px(x);
   };
 
   const main = () => {
@@ -51,6 +60,7 @@
 
     drawBall(gameWindow, ball);
     setInterval(() => {
+      drawGameWindow(gameWindow);
       ball.move();
       updateBall(ball);
     }, 30);
