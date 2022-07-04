@@ -34,42 +34,50 @@
     };
   }
 
+  class Racket {
+    #id;
+    #position;
+    #keys;
+    constructor(id, position, keys) {
+      this.#id = id;
+      this.#position = position;
+      this.#keys = keys;
+    }
+
+    #moveRacketDown(view) {
+      if (this.#position.y + 40 >= view.top + view.height) {
+        return;
+      }
+      this.#position.y = this.#position.y + 5;
+    };
+
+    #moveRacketUp(view) {
+      if (this.#position.y <= view.top) {
+        return;
+      }
+      this.#position.y = this.#position.y - 5;
+    };
+
+    move(event, view) {
+      if (event.key === this.#keys.up) {
+        this.#moveRacketUp(view);
+      }
+      if (event.key === this.#keys.down) {
+        this.#moveRacketDown(view);
+      }
+    }
+
+    getInfo() {
+      return {
+        id: this.#id,
+        position: { x: this.#position.x, y: this.#position.y },
+      };
+    }
+
+  }
+
   const px = (value) => {
     return value + 'px';
-  };
-
-  const moveRacketDown = (racketDiv, racket, view) => {
-    if (racket.top + 40 >= view.top + view.height) {
-      return;
-    }
-    racket.top = racket.top + 5;
-    racketDiv.style.top = px(racket.top);
-  };
-
-  const moveRacketUp = (racketDiv, racket, view) => {
-    if (racket.top <= view.top) {
-      return;
-    }
-    racket.top = racket.top - 5;
-    racketDiv.style.top = px(racket.top);
-  };
-
-  const moveLeftRacket = (event, leftRacketDiv, leftRacket, view) => {
-    if (event.key === 'w') {
-      moveRacketUp(leftRacketDiv, leftRacket, view);
-    }
-    if (event.key === 's') {
-      moveRacketDown(leftRacketDiv, leftRacket, view);
-    }
-  };
-
-  const moveRightRacket = (event, rightRacketDiv, rightRacket, view) => {
-    if (event.key === 'ArrowUp') {
-      moveRacketUp(rightRacketDiv, rightRacket, view);
-    }
-    if (event.key === 'ArrowDown') {
-      moveRacketDown(rightRacketDiv, rightRacket, view);
-    }
   };
 
   const drawBall = (table, ball) => {
@@ -89,14 +97,22 @@
     ballDiv.style.width = px(size);
   };
 
-  const drawRacket = (table, racket) => {
+  const drawRacket = (table, racket, racketElement) => {
+    const racketElements = document.getElementsByClassName('racket');
+    if (racketElements.length >= 2) {
+      const { position: { x, y } } = racket.getInfo();
+      racketElement.style.top = px(y);
+      return;
+    }
+    const { id, position: { x, y } } = racket.getInfo();
     const racketDiv = table.appendChild(document.createElement('div'));
-    racketDiv.id = racket.id;
+    racketDiv.id = id;
     racketDiv.className = 'racket';
     racketDiv.style.width = px(5);
     racketDiv.style.height = px(40);
-    racketDiv.style.top = px(racket.top);
-    racketDiv.style.left = px(racket.left);
+    racketDiv.style.top = px(y);
+    racketDiv.style.left = px(x);
+
   };
 
   const drawGameWindow = (view, table) => {
@@ -109,10 +125,12 @@
   };
 
   const main = () => {
-    const view = { top: 200, left: 200, width: 1000, height: 300 };
+    const view = { top: 200, left: 200, width: 500, height: 200 };
     const ball = new Ball('ball', { x: view.left, y: view.top }, 20, { dx: 2, dy: 2 });
-    const leftRacket = { id: 'leftRacket', top: view.top, left: view.left };
-    const rightRacket = { id: 'rightRacket', top: view.top, left: view.left + view.width - 4 };
+
+
+    const leftRacket = new Racket('leftRacket', { y: view.top, x: view.left }, { up: 'w', down: 's' });
+    const rightRacket = new Racket('rightRacket', { y: view.top, x: view.left + view.width - 4 }, { up: 'ArrowUp', down: 'ArrowDown' });
 
     const table = document.getElementById('table');
     drawGameWindow(view, table);
@@ -120,16 +138,18 @@
     drawRacket(table, rightRacket);
     drawBall(table, ball);
 
-    const leftRacketDiv = document.getElementById('leftRacket');
-    const rightRacketDiv = document.getElementById('rightRacket');
     document.addEventListener('keydown', (event) => {
-      moveLeftRacket(event, leftRacketDiv, leftRacket, view);
-      moveRightRacket(event, rightRacketDiv, rightRacket, view);
+      leftRacket.move(event, view);
+      rightRacket.move(event, view);
     });
 
     setInterval(() => {
       ball.move(view);
       drawBall(table, ball);
+      const leftRacketDiv = document.getElementById('leftRacket');
+      const rightRacketDiv = document.getElementById('rightRacket');
+      drawRacket(table, leftRacket, leftRacketDiv);
+      drawRacket(table, rightRacket, rightRacketDiv);
     }, 30);
   };
 
