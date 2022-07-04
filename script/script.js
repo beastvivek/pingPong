@@ -28,28 +28,32 @@
   }
 
   const drawBall = (gameWindow, ball) => {
-    const { position: { x, y } } = ball.getInfo();
+    const { size, position: { x, y } } = ball.getInfo();
     const ballDiv = gameWindow.appendChild(document.createElement('div'));
     ballDiv.id = 'ball';
     ballDiv.className = 'ball';
     ballDiv.style.top = y + 'px';
-    ballDiv.style.bottom = x + 'px';
+    ballDiv.style.left = x + 'px';
+    ballDiv.style.width = size + 'px';
   };
 
   const updateBall = (ball) => {
     const { position: { x, y } } = ball.getInfo();
     const ballDiv = document.getElementById('ball');
     ballDiv.style.top = y + 'px';
-    ballDiv.style.bottom = x + 'px';
+    ballDiv.style.left = x + 'px';
+    console.log(x, y);
   };
 
   const main = () => {
     const gameWindow = document.getElementById('game-window');
-    const ball = new Ball('ball', { x: 0, y: 0 }, 10, { dx: 2, dy: 2 });
+    const ball = new Ball('ball', { x: 0, y: 0 }, 20, { dx: 2, dy: 2 });
 
     drawBall(gameWindow, ball);
-    ball.move();
-    updateBall(ball);
+    setInterval(() => {
+      ball.move();
+      updateBall(ball);
+    }, 30);
   };
 
   window.onload = main;
