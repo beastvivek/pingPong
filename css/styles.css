@@ -1,0 +1,13 @@
+.game-window {
+  position: absolute;
+}
+
+.ball {
+  position: relative;
+  top: 0px;
+  left: 0px;
+  width: 100px;
+  aspect-ratio: 1;
+  background-color: black;
+  border-radius: 50%;
+}
