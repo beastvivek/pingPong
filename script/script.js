@@ -14,10 +14,10 @@
 
     move(view) {
       const { x, y } = this.#position;
-      if (x < 0 || this.#size + x >= view.width) {
+      if (x < view.left || this.#size + x >= view.width + view.left) {
         this.#delta.dx = -this.#delta.dx;
       }
-      if (y < 0 || this.#size + y >= view.height) {
+      if (y < view.top || this.#size + y >= view.height + view.top) {
         this.#delta.dy = -this.#delta.dy;
       }
       this.#position.x += this.#delta.dx;
@@ -38,22 +38,45 @@
     return value + 'px';
   };
 
-  const drawBall = (game, ball) => {
+  const drawBall = (table, ball) => {
     const { size, position: { x, y } } = ball.getInfo();
-    const ballDiv = game.appendChild(document.createElement('div'));
+    const ballDiv = table.appendChild(document.createElement('div'));
     ballDiv.id = 'ball';
     ballDiv.className = 'ball';
-    ballDiv.style.top = px(y);
-    ballDiv.style.left = px(x);
+    ballDiv.style.top = px(table.top);
+    ballDiv.style.left = px(table.left);
     ballDiv.style.width = px(size);
   };
 
-  const drawGameWindow = (view) => {
-    const { width, height } = view;
-    const gameDiv = document.getElementById('game-window');
-    gameDiv.style.width = px(width);
-    gameDiv.style.height = px(height);
-    gameDiv.style.border = `${px(1)} solid black`;
+  const drawLeftRacket = (view, table) => {
+    const { width, height, top, left } = view;
+    const racketDiv = table.appendChild(document.createElement('div'));
+    racketDiv.id = 'racket-1';
+    racketDiv.className = 'racket';
+    racketDiv.style.top = px(top);
+    racketDiv.style.left = px(left);
+    racketDiv.style.width = px(5);
+    racketDiv.style.height = px(40);
+  };
+
+  const drawRightRacket = (view, table) => {
+    const { width, height, top, left } = view;
+    const racketDiv = table.appendChild(document.createElement('div'));
+    racketDiv.id = 'racket-2';
+    racketDiv.className = 'racket';
+    racketDiv.style.width = px(5);
+    racketDiv.style.height = px(40);
+    racketDiv.style.top = px(top + height - 39);
+    racketDiv.style.left = px(left + width - 4);
+  };
+
+  const drawGameWindow = (view, table) => {
+    const { width, height, top, left } = view;
+    table.style.top = px(top);
+    table.style.left = px(left);
+    table.style.width = px(width);
+    table.style.height = px(height);
+    table.style.border = `${px(1)} solid black`;
   };
 
   const updateBall = (ball) => {
@@ -64,12 +87,14 @@
   };
 
   const main = () => {
-    const view = { width: 500, height: 300 };
-    const ball = new Ball('ball', { x: 0, y: 0 }, 20, { dx: 2, dy: 2 });
+    const view = { top: 100, left: 100, width: 500, height: 300 };
+    const ball = new Ball('ball', { x: 100, y: 100 }, 20, { dx: 2, dy: 2 });
 
-    const game = document.getElementById('game-window');
-    drawGameWindow(view);
-    drawBall(game, ball);
+    const table = document.getElementById('table');
+    drawGameWindow(view, table);
+    drawLeftRacket(view, table);
+    drawRightRacket(view, table);
+    drawBall(table, ball);
     setInterval(() => {
       ball.move(view);
       updateBall(ball);

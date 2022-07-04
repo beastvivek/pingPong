@@ -1,9 +1,14 @@
-.game-window {
-  position: absolute;
+.table {
+  position: fixed;
+}
+
+.racket {
+  position: fixed;
+  background-color: black;
 }
 
 .ball {
-  position: relative;
+  position: fixed;
   aspect-ratio: 1;
   background-color: black;
   border-radius: 50%;
