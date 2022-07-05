@@ -67,28 +67,28 @@
     #id;
     #position;
     #size;
+    #speed;
     #keys;
-    #hasHit;
-    constructor(id, position, size, keys, hasHit) {
+    constructor(id, position, size, speed, keys) {
       this.#id = id;
       this.#position = position;
       this.#size = size;
+      this.#speed = speed;
       this.#keys = keys;
-      this.#hasHit = hasHit;
     }
 
     #moveRacketDown(view) {
       if (this.#position.y + 40 >= view.top + view.height) {
         return;
       }
-      this.#position.y = this.#position.y + 5;
+      this.#position.y = this.#position.y + this.#speed;
     };
 
     #moveRacketUp(view) {
       if (this.#position.y <= view.top) {
         return;
       }
-      this.#position.y = this.#position.y - 5;
+      this.#position.y = this.#position.y - this.#speed;
     };
 
     move(event, view) {
@@ -159,7 +159,7 @@
   const drawRacket = (table, racket, racketElement) => {
     const racketElements = document.getElementsByClassName('racket');
     if (racketElements.length >= 2) {
-      const { position: { x, y } } = racket.getInfo();
+      const { position: { y } } = racket.getInfo();
       racketElement.style.top = px(y);
       return;
     }
@@ -206,8 +206,8 @@
     const middleX = view.width / 2 + view.left;
     const ball = new Ball('ball', { x: middleX, y: middleY }, 20, { dx: 2, dy: 2 });
 
-    const leftRacket = new Racket('leftRacket', { y: view.top, x: view.left + 2 }, { width: 2, height: 40 }, { up: 'w', down: 's' });
-    const rightRacket = new Racket('rightRacket', { y: view.top, x: view.left + view.width - 2 }, { width: 2, height: 40 }, { up: 'ArrowUp', down: 'ArrowDown' });
+    const leftRacket = new Racket('leftRacket', { y: view.top, x: view.left + 2 }, { width: 2, height: 40 }, 10, { up: 'w', down: 's' });
+    const rightRacket = new Racket('rightRacket', { y: view.top, x: view.left + view.width - 2 }, { width: 2, height: 40 }, 10, { up: 'ArrowUp', down: 'ArrowDown' });
 
     const table = document.getElementById('table');
     drawGameWindow(view, table);
