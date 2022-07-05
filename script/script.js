@@ -100,28 +100,29 @@
       }
     }
 
-    #checkRightRacket(ball, racket) {
+    #checkRightRacket(ball) {
       if (ball.inRightRange(this.#position.x, this.#position.x + this.#size.width)) {
         if (ball.hasHitRacket(this.#position.y, this.#position.y + this.#size.height)) {
           ball.changeDx();
+          return true;
         }
       }
     }
 
-    #checkLeftRacket(ball, racket) {
+    #checkLeftRacket(ball) {
       if (ball.inLeftRange(this.#position.x + this.#size.width, this.#position.x + this.#size.width)) {
         if (ball.hasHitRacket(this.#position.y, this.#position.y + this.#size.height)) {
           ball.changeDx();
+          return true;
         }
       }
     }
 
-    hasHitBall(ball, racket) {
+    hasHitBall(ball) {
       if (this.#id === 'rightRacket') {
-        this.#checkRightRacket(ball, racket);
-        return;
+        return this.#checkRightRacket(ball);
       }
-      this.#checkLeftRacket(ball, racket);
+      return this.#checkLeftRacket(ball);
     }
 
     getInfo() {
@@ -182,6 +183,23 @@
     table.style.border = `${px(1)} solid black`;
   };
 
+  const createScoreCard = () => {
+    const scoreCard = document.createElement('div');
+    const body = document.getElementById('body');
+    const div = body.appendChild(scoreCard);
+    div.className = 'score-card';
+    div.style.padding = px(10);
+    div.style.width = px(200);
+    div.style.height = px(50);
+    div.style.textAlign = 'center';
+    div.innerText = 0;
+    return div;
+  };
+
+  const updateScore = (score) => {
+    score.innerText = parseInt(score.innerText) + 1;
+  };
+
   const main = () => {
     const view = { top: 200, left: 200, width: 500, height: 200 };
     const middleY = view.height / 2 + view.top;
@@ -196,6 +214,7 @@
     drawRacket(table, leftRacket);
     drawRacket(table, rightRacket);
     drawBall(table, ball);
+    const score = createScoreCard();
 
     document.addEventListener('keydown', (event) => {
       leftRacket.move(event, view);
@@ -207,8 +226,9 @@
       drawBall(table, ball);
       const leftRacketDiv = document.getElementById('leftRacket');
       const rightRacketDiv = document.getElementById('rightRacket');
-      leftRacket.hasHitBall(ball, rightRacket);
-      rightRacket.hasHitBall(ball, leftRacket);
+      if (leftRacket.hasHitBall(ball) || rightRacket.hasHitBall(ball)) {
+        updateScore(score);
+      }
       drawRacket(table, leftRacket, leftRacketDiv);
       drawRacket(table, rightRacket, rightRacketDiv);
       ball.hasHitWall(view, table, intervalId);
