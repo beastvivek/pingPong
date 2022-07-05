@@ -108,6 +108,53 @@
     }
   }
 
+  class Game {
+    #view;
+    #rackets;
+    #ball;
+    #score;
+    constructor(view, rackets, ball, score) {
+      this.#view = view;
+      this.#rackets = rackets;
+      this.#ball = ball;
+      this.#score = score;
+    }
+
+    #moveBall() {
+      this.#ball.move(this.#view);
+    }
+
+    #updateOnCollision() {
+      for (const racket in this.#rackets) {
+        if (haveCollided(this.#rackets[racket], this.#ball)) {
+          this.#score++;
+          this.#ball.changeDx();
+        }
+      }
+    }
+
+    update() {
+      this.#moveBall();
+      this.#updateOnCollision();
+    }
+
+    isOver() {
+      return this.#ball.hasHitWall(this.#view);
+    }
+
+    getInfo() {
+      return {
+        view: this.#view,
+        score: this.#score,
+        ball: this.#ball,
+        rackets: {
+          leftRacket: this.#rackets.leftRacket,
+          rightRacket: this.#rackets.rightRacket
+        }
+      };
+    }
+  }
+
   const hasHitRightRacket = (racket, ball) => {
     const { position } = racket.getInfo();
     if (ball.isInRightRacketsRange(position.x)) {
@@ -132,9 +179,7 @@
     return hasHitLeftRacket(racket, ball);
   };
 
-  const px = (value) => {
-    return value + 'px';
-  };
+  const px = (value) => value + 'px';
 
   const endGame = (table, intervalId) => {
     const gameOver = document.createElement('div');
@@ -188,16 +233,17 @@
     table.style.border = `${px(1)} solid black`;
   };
 
-  const createScoreCard = () => {
+  const drawScoreCard = () => {
     const scoreCard = document.createElement('div');
     const body = document.getElementById('body');
     const div = body.appendChild(scoreCard);
     div.className = 'score-card';
+    div.id = 'score-card';
     div.innerText = 0;
-    return div;
   };
 
-  const drawScoreCard = (scoreCard, score) => {
+  const updateScoreCard = (score) => {
+    const scoreCard = document.getElementById('score-card');
     scoreCard.innerText = score;
   };
 
@@ -208,8 +254,8 @@
     });
   };
 
-  const createObjects = () => {
-    const view = { top: 200, left: 200, width: 500, height: 200 };
+  const createGame = () => {
+    const view = { id: 'table', top: 200, left: 200, width: 500, height: 200 };
     const middleY = view.height / 2 + view.top;
     const middleX = view.width / 2 + view.left;
     const ball = new Ball('ball',
@@ -229,33 +275,35 @@
       10,
       { up: 'ArrowUp', down: 'ArrowDown' });
 
-    return { view, leftRacket, rightRacket, ball };
+    const game = new Game(view, { leftRacket, rightRacket }, ball, 0);
+
+    return game;
   };
 
-  const main = () => {
-    const { view, leftRacket, rightRacket, ball } = createObjects();
-
+  const drawGame = (game) => {
+    const { view, ball, rackets: { leftRacket, rightRacket } } = game.getInfo();
     const table = document.getElementById('table');
     drawGameWindow(view, table);
     drawRacket(table, leftRacket);
     drawRacket(table, rightRacket);
     drawBall(table, ball);
+    drawScoreCard();
+  }
+
+  const main = () => {
+    const game = createGame();
+    const { view, ball, rackets: { leftRacket, rightRacket } } = game.getInfo();
 
     addEventListeners(view, leftRacket, rightRacket);
-
-    const scoreCard = createScoreCard();
-    let score = 0;
+    drawGame(game);
 
     const intervalId = setInterval(() => {
-      ball.move(view);
-      if (haveCollided(leftRacket, ball) || haveCollided(rightRacket, ball)) {
-        score++;
-        ball.changeDx();
-      }
-      if (ball.hasHitWall(view)) {
+      game.update();
+      if (game.isOver()) {
         endGame(table, intervalId);
       }
-      drawScoreCard(scoreCard, score);
+      const { score } = game.getInfo();
+      updateScoreCard(score);
       updateBall(ball);
       updateRacket(leftRacket);
       updateRacket(rightRacket);
