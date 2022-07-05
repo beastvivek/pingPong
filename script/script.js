@@ -33,12 +33,12 @@
       this.#delta.dx = -this.#delta.dx;
     }
 
-    inLeftRange(minX, maxX) {
-      return (this.#position.x >= minX && this.#position.x <= maxX);
+    inLeftRacketsRange(minX) {
+      return (this.#position.x === minX);
     }
 
-    inRightRange(minX, maxX) {
-      return (this.#position.x + this.#size >= minX && this.#position.x + this.#size <= maxX);
+    inRightRacketsRange(minX) {
+      return (this.#position.x + this.#size === minX);
     }
 
     hasHitRacket(minY, maxY) {
@@ -101,8 +101,10 @@
     }
 
     #checkRightRacket(ball) {
-      if (ball.inRightRange(this.#position.x, this.#position.x + this.#size.width)) {
-        if (ball.hasHitRacket(this.#position.y, this.#position.y + this.#size.height)) {
+      if (ball.inRightRacketsRange(this.#position.x)) {
+        const minY = this.#position.y;
+        const maxY = this.#position.y + this.#size.height;
+        if (ball.hasHitRacket(minY, maxY)) {
           ball.changeDx();
           return true;
         }
@@ -110,8 +112,10 @@
     }
 
     #checkLeftRacket(ball) {
-      if (ball.inLeftRange(this.#position.x + this.#size.width, this.#position.x + this.#size.width)) {
-        if (ball.hasHitRacket(this.#position.y, this.#position.y + this.#size.height)) {
+      if (ball.inLeftRacketsRange(this.#position.x + this.#size.width)) {
+        const minY = this.#position.y;
+        const maxY = this.#position.y + this.#size.height;
+        if (ball.hasHitRacket(minY, maxY)) {
           ball.changeDx();
           return true;
         }
