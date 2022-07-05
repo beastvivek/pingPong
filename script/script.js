@@ -144,16 +144,14 @@
     clearInterval(intervalId);
   };
 
+  const updateBall = (ball) => {
+    const { id, position: { x, y } } = ball.getInfo();
+    const ballElement = document.getElementById(id);
+    ballElement.style.top = px(y);
+    ballElement.style.left = px(x);
+  };
+
   const drawBall = (table, ball) => {
-    const ballElement = document.getElementById('ball');
-
-    if (ballElement) {
-      const { position: { x, y } } = ball.getInfo();
-      ballElement.style.top = px(y);
-      ballElement.style.left = px(x);
-      return;
-    }
-
     const { size } = ball.getInfo();
     const ballDiv = table.appendChild(document.createElement('div'));
     ballDiv.id = 'ball';
@@ -163,15 +161,14 @@
     ballDiv.style.width = px(size);
   };
 
-  const drawRacket = (table, racket, racketElement) => {
-    const racketElements = document.getElementsByClassName('racket');
+  const updateRacket = (racket) => {
+    const { id } = racket.getInfo();
+    const racketElement = document.getElementById(id);
+    const { position: { y } } = racket.getInfo();
+    racketElement.style.top = px(y);
+  }
 
-    if (racketElements.length >= 2) {
-      const { position: { y } } = racket.getInfo();
-      racketElement.style.top = px(y);
-      return;
-    }
-
+  const drawRacket = (table, racket) => {
     const { id, position: { x, y }, size: { width, height } } = racket.getInfo();
     const racketDiv = table.appendChild(document.createElement('div'));
     racketDiv.id = id;
@@ -231,6 +228,7 @@
       { width: 2, height: 40 },
       10,
       { up: 'ArrowUp', down: 'ArrowDown' });
+
     return { view, leftRacket, rightRacket, ball };
   };
 
@@ -248,9 +246,6 @@
     const scoreCard = createScoreCard();
     let score = 0;
 
-    const leftRacketDiv = document.getElementById('leftRacket');
-    const rightRacketDiv = document.getElementById('rightRacket');
-
     const intervalId = setInterval(() => {
       ball.move(view);
       if (haveCollided(leftRacket, ball) || haveCollided(rightRacket, ball)) {
@@ -261,9 +256,9 @@
         endGame(table, intervalId);
       }
       drawScoreCard(scoreCard, score);
-      drawBall(table, ball);
-      drawRacket(table, leftRacket, leftRacketDiv);
-      drawRacket(table, rightRacket, rightRacketDiv);
+      updateBall(ball);
+      updateRacket(leftRacket);
+      updateRacket(rightRacket);
     }, 20);
   };
 
