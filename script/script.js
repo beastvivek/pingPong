@@ -126,7 +126,7 @@
 
     #updateOnCollision() {
       for (const racket in this.#rackets) {
-        if (haveCollided(this.#rackets[racket], this.#ball)) {
+        if (this.#haveCollided(this.#rackets[racket])) {
           this.#score++;
           this.#ball.changeDx();
         }
@@ -142,6 +142,30 @@
       return this.#ball.hasHitWall(this.#view);
     }
 
+    #hasHitRightRacket(rightRacket) {
+      const { position } = rightRacket.getInfo();
+      if (this.#ball.isInRightRacketsRange(position.x)) {
+        return this.#ball.hasHit(rightRacket);
+      }
+      return false;
+    };
+
+    #hasHitLeftRacket(leftRacket) {
+      const { position, size } = leftRacket.getInfo();
+      if (this.#ball.isInLeftRacketsRange(position.x + size.width)) {
+        return this.#ball.hasHit(leftRacket);
+      }
+      return false;
+    };
+
+    #haveCollided(racket) {
+      const { id } = racket.getInfo();
+      if (id === 'rightRacket') {
+        return this.#hasHitRightRacket(this.#rackets.rightRacket);
+      }
+      return this.#hasHitLeftRacket(this.#rackets.leftRacket);
+    };
+
     getInfo() {
       return {
         view: this.#view,
@@ -154,30 +178,6 @@
       };
     }
   }
-
-  const hasHitRightRacket = (racket, ball) => {
-    const { position } = racket.getInfo();
-    if (ball.isInRightRacketsRange(position.x)) {
-      return ball.hasHit(racket);
-    }
-    return false;
-  };
-
-  const hasHitLeftRacket = (racket, ball) => {
-    const { position, size } = racket.getInfo();
-    if (ball.isInLeftRacketsRange(position.x + size.width)) {
-      return ball.hasHit(racket);
-    }
-    return false;
-  };
-
-  const haveCollided = (racket, ball) => {
-    const { id } = racket.getInfo();
-    if (id === 'rightRacket') {
-      return hasHitRightRacket(racket, ball);
-    }
-    return hasHitLeftRacket(racket, ball);
-  };
 
   const px = (value) => value + 'px';
 
@@ -260,7 +260,7 @@
     const middleX = view.width / 2 + view.left;
     const ball = new Ball('ball',
       { x: middleX, y: middleY },
-      20,
+      10,
       { dx: 2, dy: 2 });
 
     const leftRacket = new Racket('leftRacket',
