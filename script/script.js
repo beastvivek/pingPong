@@ -1,4 +1,12 @@
 (function () {
+  const gameEnd = (table) => {
+    const gameOver = document.createElement('div');
+    const gameOverTag = table.appendChild(gameOver);
+    gameOverTag.id = 'game-over';
+    gameOverTag.className = 'game-over';
+    gameOver.innerText = 'GAME OVER!!';
+  };
+
   class Ball {
     #id;
     #position;
@@ -13,15 +21,36 @@
     }
 
     move(view) {
-      const { x, y } = this.#position;
-      if (x < view.left || this.#size + x >= view.width + view.left) {
-        this.#delta.dx = -this.#delta.dx;
-      }
+      const { y } = this.#position;
       if (y < view.top || this.#size + y >= view.height + view.top) {
         this.#delta.dy = -this.#delta.dy;
       }
       this.#position.x += this.#delta.dx;
       this.#position.y += this.#delta.dy;
+    }
+
+    changeDx() {
+      this.#delta.dx = -this.#delta.dx;
+    }
+
+    inLeftRange(minX, maxX) {
+      return (this.#position.x >= minX && this.#position.x <= maxX);
+    }
+
+    inRightRange(minX, maxX) {
+      return (this.#position.x + this.#size >= minX && this.#position.x + this.#size <= maxX);
+    }
+
+    hasHitRacket(minY, maxY) {
+      return (this.#position.y + this.#size / 2 >= minY && this.#position.y + this.#size / 2 <= maxY);
+    }
+
+    hasHitWall(view, table, intervalId) {
+      const { x } = this.#position;
+      if (x < view.left || this.#size + x > view.width + view.left) {
+        gameEnd(table);
+        clearInterval(intervalId);
+      }
     }
 
     getInfo() {
@@ -37,11 +66,15 @@
   class Racket {
     #id;
     #position;
+    #size;
     #keys;
-    constructor(id, position, keys) {
+    #hasHit;
+    constructor(id, position, size, keys, hasHit) {
       this.#id = id;
       this.#position = position;
+      this.#size = size;
       this.#keys = keys;
+      this.#hasHit = hasHit;
     }
 
     #moveRacketDown(view) {
@@ -67,10 +100,35 @@
       }
     }
 
+    #checkRightRacket(ball, racket) {
+      if (ball.inRightRange(this.#position.x, this.#position.x + this.#size.width)) {
+        if (ball.hasHitRacket(this.#position.y, this.#position.y + this.#size.height)) {
+          ball.changeDx();
+        }
+      }
+    }
+
+    #checkLeftRacket(ball, racket) {
+      if (ball.inLeftRange(this.#position.x + this.#size.width, this.#position.x + this.#size.width)) {
+        if (ball.hasHitRacket(this.#position.y, this.#position.y + this.#size.height)) {
+          ball.changeDx();
+        }
+      }
+    }
+
+    hasHitBall(ball, racket) {
+      if (this.#id === 'rightRacket') {
+        this.#checkRightRacket(ball, racket);
+        return;
+      }
+      this.#checkLeftRacket(ball, racket);
+    }
+
     getInfo() {
       return {
         id: this.#id,
         position: { x: this.#position.x, y: this.#position.y },
+        size: { width: this.#size.width, height: this.#size.height }
       };
     }
 
@@ -104,12 +162,12 @@
       racketElement.style.top = px(y);
       return;
     }
-    const { id, position: { x, y } } = racket.getInfo();
+    const { id, position: { x, y }, size: { width, height } } = racket.getInfo();
     const racketDiv = table.appendChild(document.createElement('div'));
     racketDiv.id = id;
     racketDiv.className = 'racket';
-    racketDiv.style.width = px(5);
-    racketDiv.style.height = px(40);
+    racketDiv.style.width = px(width);
+    racketDiv.style.height = px(height);
     racketDiv.style.top = px(y);
     racketDiv.style.left = px(x);
 
@@ -126,11 +184,12 @@
 
   const main = () => {
     const view = { top: 200, left: 200, width: 500, height: 200 };
-    const ball = new Ball('ball', { x: view.left, y: view.top }, 20, { dx: 2, dy: 2 });
+    const middleY = view.height / 2 + view.top;
+    const middleX = view.width / 2 + view.left;
+    const ball = new Ball('ball', { x: middleX, y: middleY }, 20, { dx: 2, dy: 2 });
 
-
-    const leftRacket = new Racket('leftRacket', { y: view.top, x: view.left }, { up: 'w', down: 's' });
-    const rightRacket = new Racket('rightRacket', { y: view.top, x: view.left + view.width - 4 }, { up: 'ArrowUp', down: 'ArrowDown' });
+    const leftRacket = new Racket('leftRacket', { y: view.top, x: view.left + 2 }, { width: 2, height: 40 }, { up: 'w', down: 's' });
+    const rightRacket = new Racket('rightRacket', { y: view.top, x: view.left + view.width - 2 }, { width: 2, height: 40 }, { up: 'ArrowUp', down: 'ArrowDown' });
 
     const table = document.getElementById('table');
     drawGameWindow(view, table);
@@ -143,14 +202,17 @@
       rightRacket.move(event, view);
     });
 
-    setInterval(() => {
+    const intervalId = setInterval(() => {
       ball.move(view);
       drawBall(table, ball);
       const leftRacketDiv = document.getElementById('leftRacket');
       const rightRacketDiv = document.getElementById('rightRacket');
+      leftRacket.hasHitBall(ball, rightRacket);
+      rightRacket.hasHitBall(ball, leftRacket);
       drawRacket(table, leftRacket, leftRacketDiv);
       drawRacket(table, rightRacket, rightRacketDiv);
-    }, 30);
+      ball.hasHitWall(view, table, intervalId);
+    }, 20);
   };
 
   window.onload = main;

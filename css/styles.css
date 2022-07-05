@@ -13,3 +13,9 @@
   background-color: black;
   border-radius: 50%;
 }
+
+.game-over {
+  color: red;
+  font-size: 25px;
+  padding: 10px;
+}
