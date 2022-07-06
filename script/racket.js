@@ -3,37 +3,26 @@ class Racket {
   #position;
   #size;
   #speed;
-  #keys;
-  constructor(id, position, size, speed, keys) {
+  constructor(id, position, size, speed) {
     this.#id = id;
     this.#position = position;
     this.#size = size;
     this.#speed = speed;
-    this.#keys = keys;
   }
 
-  #moveDown(view) {
-    if (this.#position.y + 40 >= view.top + view.height) {
+  moveDown(view) {
+    if (this.#position.y + this.#size.height >= view.top + view.height) {
       return;
     }
     this.#position.y = this.#position.y + this.#speed;
   };
 
-  #moveUp(view) {
+  moveUp(view) {
     if (this.#position.y <= view.top) {
       return;
     }
     this.#position.y = this.#position.y - this.#speed;
   };
-
-  move(event, view) {
-    if (event.key === this.#keys.up) {
-      this.#moveUp(view);
-    }
-    if (event.key === this.#keys.down) {
-      this.#moveDown(view);
-    }
-  }
 
   getInfo() {
     return {

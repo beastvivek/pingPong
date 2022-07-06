@@ -67,11 +67,19 @@
     scoreCard.innerText = score;
   };
 
-  const addEventListeners = (view, leftRacket, rightRacket) => {
-    document.addEventListener('keydown', (event) => {
-      leftRacket.move(event, view);
-      rightRacket.move(event, view);
-    });
+  const controller = (key, view, leftRacket, rightRacket) => {
+    if (key === 'w') {
+      leftRacket.moveUp(view);
+    }
+    if (key === 's') {
+      leftRacket.moveDown(view);
+    }
+    if (key === 'ArrowUp') {
+      rightRacket.moveUp(view);
+    }
+    if (key === 'ArrowDown') {
+      rightRacket.moveDown(view);
+    }
   };
 
   const createGame = () => {
@@ -86,14 +94,12 @@
     const leftRacket = new Racket('leftRacket',
       { y: view.top, x: view.left + 2 },
       { width: 2, height: 40 },
-      10,
-      { up: 'w', down: 's' });
+      10);
 
     const rightRacket = new Racket('rightRacket',
       { y: view.top, x: view.left + view.width - 2 },
       { width: 2, height: 40 },
-      10,
-      { up: 'ArrowUp', down: 'ArrowDown' });
+      10);
 
     const game = new Game(view, { leftRacket, rightRacket }, ball, 0);
 
@@ -114,7 +120,10 @@
     const game = createGame();
     const { view, ball, rackets: { leftRacket, rightRacket } } = game.getInfo();
 
-    addEventListeners(view, leftRacket, rightRacket);
+    document.addEventListener('keydown', (event) => {
+      controller(event.key, view, leftRacket, rightRacket);
+    });
+
     drawGame(game);
 
     const intervalId = setInterval(() => {
