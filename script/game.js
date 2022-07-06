@@ -1,17 +1,17 @@
 class Game {
-  #view;
+  #table;
   #rackets;
   #ball;
   #score;
-  constructor(view, rackets, ball, score) {
-    this.#view = view;
+  constructor(table, rackets, ball, score) {
+    this.#table = table;
     this.#rackets = rackets;
     this.#ball = ball;
     this.#score = score;
   }
 
   #moveBall() {
-    this.#ball.move(this.#view);
+    this.#ball.move(this.#table);
   }
 
   #updateOnCollision() {
@@ -29,7 +29,7 @@ class Game {
   }
 
   isOver() {
-    return this.#ball.hasHitWall(this.#view);
+    return this.#ball.hasHitWall(this.#table);
   }
 
   #hasHitRightRacket(rightRacket) {
@@ -58,7 +58,7 @@ class Game {
 
   getInfo() {
     return {
-      view: this.#view,
+      table: this.#table,
       score: this.#score,
       ball: this.#ball,
       rackets: {

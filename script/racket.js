@@ -10,15 +10,15 @@ class Racket {
     this.#speed = speed;
   }
 
-  moveDown(view) {
-    if (this.#position.y + this.#size.height >= view.top + view.height) {
+  moveDown(table) {
+    if (this.#position.y + this.#size.height >= table.top + table.height) {
       return;
     }
     this.#position.y = this.#position.y + this.#speed;
   };
 
-  moveUp(view) {
-    if (this.#position.y <= view.top) {
+  moveUp(table) {
+    if (this.#position.y <= table.top) {
       return;
     }
     this.#position.y = this.#position.y - this.#speed;

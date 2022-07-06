@@ -11,9 +11,9 @@ class Ball {
     this.#delta = delta;
   }
 
-  move(view) {
+  move(table) {
     const { y } = this.#position;
-    if (y < view.top || this.#size + y >= view.height + view.top) {
+    if (y < table.top || this.#size + y >= table.height + table.top) {
       this.#delta.dy = -this.#delta.dy;
     }
     this.#position.x += this.#delta.dx;
@@ -32,20 +32,20 @@ class Ball {
     return (this.#position.x + this.#size === minX);
   }
 
-  #isInRange(minY, maxY) {
+  #isBetween(minY, maxY) {
     return (this.#position.y + this.#size / 2 >= minY && this.#position.y + this.#size / 2 <= maxY);
   }
 
-  hasHitWall(view) {
+  hasHitWall(table) {
     const { x } = this.#position;
-    return x < view.left || this.#size + x > view.width + view.left;
+    return x < table.left || this.#size + x > table.width + table.left;
   }
 
   hasHit(racket) {
     const { position, size } = racket.getInfo();
     const minY = position.y;
     const maxY = position.y + size.height;
-    if (this.#isInRange(minY, maxY)) {
+    if (this.#isBetween(minY, maxY)) {
       return true;
     }
     return false;

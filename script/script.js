@@ -1,13 +1,14 @@
 (function () {
-  const px = (value) => value + 'px';
-
-  const endGame = (table, intervalId) => {
+  const endGame = (intervalId) => {
+    const body = document.getElementById('body');
     const gameOver = document.createElement('div');
-    const gameOverTag = table.appendChild(gameOver);
+    const gameOverTag = body.appendChild(gameOver);
     gameOverTag.className = 'game-over';
     gameOver.innerText = 'GAME OVER!!';
     clearInterval(intervalId);
   };
+
+  const px = (value) => value + 'px';
 
   const drawBall = (table, ball) => {
     const { size } = ball.getInfo();
@@ -44,13 +45,13 @@
     racketElement.style.top = px(y);
   };
 
-  const drawGameWindow = (view, table) => {
-    const { width, height, top, left } = view;
-    table.style.top = px(top);
-    table.style.left = px(left);
-    table.style.width = px(width);
-    table.style.height = px(height);
-    table.style.border = `${px(1)} solid black`;
+  const drawGameWindow = (table, tableDiv) => {
+    const { width, height, top, left } = table;
+    tableDiv.style.top = px(top);
+    tableDiv.style.left = px(left);
+    tableDiv.style.width = px(width);
+    tableDiv.style.height = px(height);
+    tableDiv.style.border = `${px(1)} solid black`;
   };
 
   const drawScoreCard = () => {
@@ -67,75 +68,79 @@
     scoreCard.innerText = score;
   };
 
-  const controller = (key, view, leftRacket, rightRacket) => {
+  const controller = (key, table, leftRacket, rightRacket) => {
     if (key === 'w') {
-      leftRacket.moveUp(view);
+      leftRacket.moveUp(table);
     }
     if (key === 's') {
-      leftRacket.moveDown(view);
+      leftRacket.moveDown(table);
     }
     if (key === 'ArrowUp') {
-      rightRacket.moveUp(view);
+      rightRacket.moveUp(table);
     }
     if (key === 'ArrowDown') {
-      rightRacket.moveDown(view);
+      rightRacket.moveDown(table);
     }
   };
 
+  const drawView = (game) => {
+    const { table, ball, rackets: { leftRacket, rightRacket } } = game.getInfo();
+    const tableDiv = document.getElementById('table');
+    drawGameWindow(table, tableDiv);
+    drawRacket(tableDiv, leftRacket);
+    drawRacket(tableDiv, rightRacket);
+    drawBall(tableDiv, ball);
+    drawScoreCard();
+  };
+
+  const updateView = (game) => {
+    const { ball, rackets: { leftRacket, rightRacket }, score } = game.getInfo();
+    updateScoreCard(score);
+    updateBall(ball);
+    updateRacket(leftRacket);
+    updateRacket(rightRacket);
+  };
+
   const createGame = () => {
-    const view = { id: 'table', top: 200, left: 200, width: 500, height: 200 };
-    const middleY = view.height / 2 + view.top;
-    const middleX = view.width / 2 + view.left;
+    const table = { id: 'table', top: 200, left: 200, width: 500, height: 200 };
+    const middleY = table.height / 2 + table.top;
+    const middleX = table.width / 2 + table.left;
     const ball = new Ball('ball',
       { x: middleX, y: middleY },
       10,
       { dx: 2, dy: 2 });
 
     const leftRacket = new Racket('leftRacket',
-      { y: view.top, x: view.left + 2 },
+      { y: table.top, x: table.left + 2 },
       { width: 2, height: 40 },
       10);
 
     const rightRacket = new Racket('rightRacket',
-      { y: view.top, x: view.left + view.width - 2 },
+      { y: table.top, x: table.left + table.width - 2 },
       { width: 2, height: 40 },
       10);
 
-    const game = new Game(view, { leftRacket, rightRacket }, ball, 0);
+    const game = new Game(table, { leftRacket, rightRacket }, ball, 0);
 
     return game;
   };
 
-  const drawGame = (game) => {
-    const { view, ball, rackets: { leftRacket, rightRacket } } = game.getInfo();
-    const table = document.getElementById('table');
-    drawGameWindow(view, table);
-    drawRacket(table, leftRacket);
-    drawRacket(table, rightRacket);
-    drawBall(table, ball);
-    drawScoreCard();
-  }
-
   const main = () => {
     const game = createGame();
-    const { view, ball, rackets: { leftRacket, rightRacket } } = game.getInfo();
+    const { table, rackets: { leftRacket, rightRacket } } = game.getInfo();
 
     document.addEventListener('keydown', (event) => {
-      controller(event.key, view, leftRacket, rightRacket);
+      controller(event.key, table, leftRacket, rightRacket);
     });
 
-    drawGame(game);
+    drawView(game);
 
     const intervalId = setInterval(() => {
-      game.update();
       if (game.isOver()) {
-        endGame(table, intervalId);
+        endGame(intervalId);
       }
-      const { score } = game.getInfo();
-      updateScoreCard(score);
-      updateBall(ball);
-      updateRacket(leftRacket);
-      updateRacket(rightRacket);
+      game.update();
+      updateView(game);
     }, 20);
   };
 
