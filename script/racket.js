@@ -18,7 +18,7 @@ class Racket {
   };
 
   moveUp(table) {
-    if (this.#position.y <= table.top) {
+    if (this.#position.y <= table.top + table.border) {
       return;
     }
     this.#position.y = this.#position.y - this.#speed;

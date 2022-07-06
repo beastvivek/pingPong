@@ -51,7 +51,7 @@
     tableDiv.style.left = px(left);
     tableDiv.style.width = px(width);
     tableDiv.style.height = px(height);
-    tableDiv.style.border = `${px(1)} solid black`;
+    tableDiv.style.border = `${table.border}px solid black`;
   };
 
   const drawScoreCard = () => {
@@ -68,7 +68,8 @@
     scoreCard.innerText = score;
   };
 
-  const controller = (key, table, leftRacket, rightRacket) => {
+  const controller = (key, game) => {
+    const { table, rackets: { leftRacket, rightRacket } } = game.getInfo();
     if (key === 'w') {
       leftRacket.moveUp(table);
     }
@@ -80,6 +81,15 @@
     }
     if (key === 'ArrowDown') {
       rightRacket.moveDown(table);
+    }
+    if (key === ' ') {
+      const intervalId = setInterval(() => {
+        if (game.isOver()) {
+          endGame(intervalId);
+        }
+        game.update();
+        updateView(game);
+      }, 20);
     }
   };
 
@@ -102,7 +112,7 @@
   };
 
   const createGame = () => {
-    const table = { id: 'table', top: 200, left: 200, width: 500, height: 200 };
+    const table = { id: 'table', top: 300, left: 400, width: 500, height: 200, border: 5 };
     const middleY = table.height / 2 + table.top;
     const middleX = table.width / 2 + table.left;
     const ball = new Ball('ball',
@@ -111,13 +121,13 @@
       { dx: 2, dy: 2 });
 
     const leftRacket = new Racket('leftRacket',
-      { y: table.top, x: table.left + 2 },
-      { width: 2, height: 40 },
+      { y: table.top, x: table.left + table.border + 3 },
+      { width: 4, height: 40 },
       10);
 
     const rightRacket = new Racket('rightRacket',
       { y: table.top, x: table.left + table.width - 2 },
-      { width: 2, height: 40 },
+      { width: 4, height: 40 },
       10);
 
     const game = new Game(table, { leftRacket, rightRacket }, ball, 0);
@@ -127,21 +137,12 @@
 
   const main = () => {
     const game = createGame();
-    const { table, rackets: { leftRacket, rightRacket } } = game.getInfo();
 
     document.addEventListener('keydown', (event) => {
-      controller(event.key, table, leftRacket, rightRacket);
+      controller(event.key, game);
     });
 
     drawView(game);
-
-    const intervalId = setInterval(() => {
-      if (game.isOver()) {
-        endGame(intervalId);
-      }
-      game.update();
-      updateView(game);
-    }, 20);
   };
 
   window.onload = main;

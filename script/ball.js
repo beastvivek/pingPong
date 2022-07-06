@@ -13,7 +13,8 @@ class Ball {
 
   move(table) {
     const { y } = this.#position;
-    if (y < table.top || this.#size + y >= table.height + table.top) {
+    if (y < table.top + table.border || this.#size + y >= table.height + table.top) {
+      console.log(table.top, table.height + table.top);
       this.#delta.dy = -this.#delta.dy;
     }
     this.#position.x += this.#delta.dx;
@@ -38,7 +39,7 @@ class Ball {
 
   hasHitWall(table) {
     const { x } = this.#position;
-    return x < table.left || this.#size + x > table.width + table.left;
+    return x < table.left + table.border || this.#size + x > table.width + table.left;
   }
 
   hasHit(racket) {

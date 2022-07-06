@@ -1,6 +1,7 @@
 # Ping Pong
 
 Keep the ball inside the boundary of the view.
+  - Press 'Space Bar' to start the game
 
 Use rackets to deflect back the ball.
   - Use 'w' and 's' for moving the left racket up and down respectively.
