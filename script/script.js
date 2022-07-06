@@ -1,184 +1,4 @@
 (function () {
-  class Ball {
-    #id;
-    #position;
-    #size;
-    #delta;
-
-    constructor(id, position, size, delta) {
-      this.#id = id;
-      this.#position = position;
-      this.#size = size;
-      this.#delta = delta;
-    }
-
-    move(view) {
-      const { y } = this.#position;
-      if (y < view.top || this.#size + y >= view.height + view.top) {
-        this.#delta.dy = -this.#delta.dy;
-      }
-      this.#position.x += this.#delta.dx;
-      this.#position.y += this.#delta.dy;
-    }
-
-    changeDx() {
-      this.#delta.dx = -this.#delta.dx;
-    }
-
-    isInLeftRacketsRange(minX) {
-      return (this.#position.x === minX);
-    }
-
-    isInRightRacketsRange(minX) {
-      return (this.#position.x + this.#size === minX);
-    }
-
-    #isInRange(minY, maxY) {
-      return (this.#position.y + this.#size / 2 >= minY && this.#position.y + this.#size / 2 <= maxY);
-    }
-
-    hasHitWall(view) {
-      const { x } = this.#position;
-      return x < view.left || this.#size + x > view.width + view.left;
-    }
-
-    hasHit(racket) {
-      const { position, size } = racket.getInfo();
-      const minY = position.y;
-      const maxY = position.y + size.height;
-      if (this.#isInRange(minY, maxY)) {
-        return true;
-      }
-      return false;
-    }
-
-    getInfo() {
-      return {
-        id: this.#id,
-        position: { x: this.#position.x, y: this.#position.y },
-        size: this.#size,
-        delta: { dx: this.#delta.dx, dy: this.#delta.dy }
-      };
-    };
-  }
-
-  class Racket {
-    #id;
-    #position;
-    #size;
-    #speed;
-    #keys;
-    constructor(id, position, size, speed, keys) {
-      this.#id = id;
-      this.#position = position;
-      this.#size = size;
-      this.#speed = speed;
-      this.#keys = keys;
-    }
-
-    #moveDown(view) {
-      if (this.#position.y + 40 >= view.top + view.height) {
-        return;
-      }
-      this.#position.y = this.#position.y + this.#speed;
-    };
-
-    #moveUp(view) {
-      if (this.#position.y <= view.top) {
-        return;
-      }
-      this.#position.y = this.#position.y - this.#speed;
-    };
-
-    move(event, view) {
-      if (event.key === this.#keys.up) {
-        this.#moveUp(view);
-      }
-      if (event.key === this.#keys.down) {
-        this.#moveDown(view);
-      }
-    }
-
-    getInfo() {
-      return {
-        id: this.#id,
-        position: { x: this.#position.x, y: this.#position.y },
-        size: { width: this.#size.width, height: this.#size.height }
-      };
-    }
-  }
-
-  class Game {
-    #view;
-    #rackets;
-    #ball;
-    #score;
-    constructor(view, rackets, ball, score) {
-      this.#view = view;
-      this.#rackets = rackets;
-      this.#ball = ball;
-      this.#score = score;
-    }
-
-    #moveBall() {
-      this.#ball.move(this.#view);
-    }
-
-    #updateOnCollision() {
-      for (const racket in this.#rackets) {
-        if (this.#haveCollided(this.#rackets[racket])) {
-          this.#score++;
-          this.#ball.changeDx();
-        }
-      }
-    }
-
-    update() {
-      this.#moveBall();
-      this.#updateOnCollision();
-    }
-
-    isOver() {
-      return this.#ball.hasHitWall(this.#view);
-    }
-
-    #hasHitRightRacket(rightRacket) {
-      const { position } = rightRacket.getInfo();
-      if (this.#ball.isInRightRacketsRange(position.x)) {
-        return this.#ball.hasHit(rightRacket);
-      }
-      return false;
-    };
-
-    #hasHitLeftRacket(leftRacket) {
-      const { position, size } = leftRacket.getInfo();
-      if (this.#ball.isInLeftRacketsRange(position.x + size.width)) {
-        return this.#ball.hasHit(leftRacket);
-      }
-      return false;
-    };
-
-    #haveCollided(racket) {
-      const { id } = racket.getInfo();
-      if (id === 'rightRacket') {
-        return this.#hasHitRightRacket(this.#rackets.rightRacket);
-      }
-      return this.#hasHitLeftRacket(this.#rackets.leftRacket);
-    };
-
-    getInfo() {
-      return {
-        view: this.#view,
-        score: this.#score,
-        ball: this.#ball,
-        rackets: {
-          leftRacket: this.#rackets.leftRacket,
-          rightRacket: this.#rackets.rightRacket
-        }
-      };
-    }
-  }
-
   const px = (value) => value + 'px';
 
   const endGame = (table, intervalId) => {
@@ -187,13 +7,6 @@
     gameOverTag.className = 'game-over';
     gameOver.innerText = 'GAME OVER!!';
     clearInterval(intervalId);
-  };
-
-  const updateBall = (ball) => {
-    const { id, position: { x, y } } = ball.getInfo();
-    const ballElement = document.getElementById(id);
-    ballElement.style.top = px(y);
-    ballElement.style.left = px(x);
   };
 
   const drawBall = (table, ball) => {
@@ -206,12 +19,12 @@
     ballDiv.style.width = px(size);
   };
 
-  const updateRacket = (racket) => {
-    const { id } = racket.getInfo();
-    const racketElement = document.getElementById(id);
-    const { position: { y } } = racket.getInfo();
-    racketElement.style.top = px(y);
-  }
+  const updateBall = (ball) => {
+    const { id, position: { x, y } } = ball.getInfo();
+    const ballElement = document.getElementById(id);
+    ballElement.style.top = px(y);
+    ballElement.style.left = px(x);
+  };
 
   const drawRacket = (table, racket) => {
     const { id, position: { x, y }, size: { width, height } } = racket.getInfo();
@@ -222,6 +35,13 @@
     racketDiv.style.height = px(height);
     racketDiv.style.top = px(y);
     racketDiv.style.left = px(x);
+  };
+
+  const updateRacket = (racket) => {
+    const { id } = racket.getInfo();
+    const racketElement = document.getElementById(id);
+    const { position: { y } } = racket.getInfo();
+    racketElement.style.top = px(y);
   };
 
   const drawGameWindow = (view, table) => {
